@@ -74,18 +74,21 @@ class CrawlerPipeline(object):
 			return
 
 	def write2Mysql_LJ(self, item):
-		print 'WRITE==='*10
 		try:
-			self.cur.execute("insert into LJ (url, district, area, age, unitPrice, \
-				price, base, transaction, residentialName, title, school, circle,\
-				tags, isOnlyOne, isNormal, registertime,FangYuanTeSe,DaiKanFanKui,FangZhuZiJian) \
-				values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",\
-				(item['url'],item['district'],item['area'],item['age'],
-					item['unitPrice'],item['price'],item['base'],item['transaction'],
-					item['residentialName'],item['title'],item['school'],item['circle'],
-					item['tags'],item['isOnlyOne'],item['isNormal'],item['registertime'],
-					item['FangYuanTeSe'],item['DaiKanFanKui'],item['FangZhuZiJian']))
-			self.con.commit()
+			if len(item)==2:
+				self.cur.execute("update lj set DaiKanFanKui=%s where url=%s", (item['DaiKanFanKui'],item['url']))
+				self.con.commit()
+			else:
+				self.cur.execute("insert into LJ (url, district, area, age, unitPrice, \
+					price, base, transaction, residentialName, title, school, circle,\
+					tags, isOnlyOne, isNormal, registertime,FangYuanTeSe,DaiKanFanKui,FangZhuZiJian) \
+					values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",\
+					(item['url'],item['district'],item['area'],item['age'],
+						item['unitPrice'],item['price'],item['base'],item['transaction'],
+						item['residentialName'],item['title'],item['school'],item['circle'],
+						item['tags'],item['isOnlyOne'],item['isNormal'],item['registertime'],
+						item['FangYuanTeSe'],item['DaiKanFanKui'],item['FangZhuZiJian']))
+				self.con.commit()
 		except Exception,e:
 			print Exception,':',e
 			# self.cur.execute("insert into LJ (url) \

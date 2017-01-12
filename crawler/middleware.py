@@ -25,6 +25,7 @@ class CustomHttpProxyMiddleware(object):
         using direct download for depth <= 2
         using proxy with probability 0.3
         """
+        # return False
         return True
         # if "depth" in request.meta and int(request.meta['depth']) <= 2:
         #     return False

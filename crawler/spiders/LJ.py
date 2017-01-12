@@ -26,38 +26,43 @@ class LJSpider(scrapy.Spider):
     # 70-90 http://bj.lianjia.com/ershoufang/co32sf1l2l3l4a3p5p6/
     #http://bj.lianjia.com/ershoufang/pg2sf1l2l3l4a3p5p6/
     urls = []
-    # ped = set([1,3,4,7,9,12,13,18,20,21,22,24,25,26,30,31,33,35,36,37,39,40,43,46,47,50,51,52,53,54,55,57,58,59,60,
-    #     61,62,63,64,66,68,71,72,73,74,75,76,78,79,80,85,86,88,90,91,92,93,94,95,96,97,100,11,27,32,28,41,44,69,17,
-    #     5,98,83,45,29,48,70,99,49,82,67,77,15,19,16,42,65,81,8,84,56,23,38,14,2,6,10,87,34,89])
+    # for i in xrange(1,33):
+    #     urls.append('http://bj.lianjia.com/ershoufang/pg' + str(i) + 'sf1l2a2p4//')
 
-    for i in xrange(1,101):
-        # if i in ped: continue
-        urls.append('http://bj.lianjia.com/ershoufang/pg' + str(i) + 'sf1l2l3l4a3p5p6/')
-
-    # for line in open('todo.txt','r'):
-    #     line = line.strip()
-    #     if line in seen:continue
-    #     urls.append('http://bj.lianjia.com/ershoufang/' + line + '.html')
+    for line in open('todo.txt','r'):
+        line = line.strip()
+        if line in seen:continue
+        # urls.append('http://bj.lianjia.com/ershoufang/' + line + '.html')
+        urls.append('http://bj.lianjia.com/ershoufang/showcomment?isContent=1&page=1&order=0&id=' + line + '&_=1484200454488')
         # break
     start_urls = tuple(urls)
     
     def parse(self, response):
-        fo = open('pages.txt','a')
-        if 'pg' in response.url:
+        if 'showcomment' in response.url:
+            item = LJCrawlerItem()
+            item['url']='http://bj.lianjia.com/ershoufang/' + response.url[75:87] + '.html'
+            kv = json.loads(response.body)
+            com = []
+            for comment in kv['data']['agentList']:
+                com.append(comment['comment'])
+            item['DaiKanFanKui'] = '@@'.join(com)
+            print len(item)
+            yield item
+        # fo = open('pages.txt','a')
+        elif 'pg' in response.url:
             houseIds = set(findhouseID.findall(response.body))
             print '========='+str(len(houseIds))+'============'
             print houseIds
-            fo.write(response.url+'\n')
-            fo.close()
-            fout = open('todo.txt','a')
+            # fo.write(response.url+'\n')
+            # fo.close()
+            # fout = open('todo.txt','a')
             for hid in houseIds:
                 if hid in seen:continue
-                # hid ='101101055559'
-                fout.write(hid+'\n')
+                # fout.write(hid+'\n')
                 yield Request('http://bj.lianjia.com/ershoufang/' + hid + '.html' ,
                         callback=self.parse)
                 # break
-            fout.close()
+            # fout.close()
         else:
             soup = bs(response.body,'html5lib')
             item = LJCrawlerItem()

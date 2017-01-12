@@ -42,10 +42,14 @@ class LJSpider(scrapy.Spider):
             item = LJCrawlerItem()
             item['url']='http://bj.lianjia.com/ershoufang/' + response.url[75:87] + '.html'
             kv = json.loads(response.body)
+            
             com = []
-            for comment in kv['data']['agentList']:
-                com.append(comment['comment'])
-            item['DaiKanFanKui'] = '@@'.join(com)
+            if 'agentList' in response.body and 'data' in kv and 'agentList' in kv['data']:
+                for comment in kv['data']['agentList']:
+                    com.append(comment['comment'].replace('\r\n','').replace('\n',''))
+                item['DaiKanFanKui'] = '@@'.join(com)
+            else:
+                item['DaiKanFanKui'] = 'NULL'
             print len(item)
             yield item
         # fo = open('pages.txt','a')
@@ -156,7 +160,7 @@ class LJSpider(scrapy.Spider):
             item['unitPrice'] = info[p1+7:p2]
 
 
-            bbody= response.body.replace('幼儿园,小学,中学,大学','').replace('<!-- 对口学校 -->','')
+            bbody= response.body.replace('幼儿园,小学,中学,大学','').replace('<!-- 对口学校 -->','').replace('房主发表的内容（学区承诺、户口承诺）','')
             # 学区
             if '学区' in bbody or '中学' in bbody or '小学' in bbody or \
             '初中' in bbody or '学校' in bbody or '高中' in bbody:
